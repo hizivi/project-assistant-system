@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>研发项目助理工作系统</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231f4e78'/%3E%3Cpath d='M16 18h32v7H16zM16 30h20v7H16zM16 42h32v7H16z' fill='white'/%3E%3Ccircle cx='45' cy='33' r='8' fill='%23f2c94c'/%3E%3Cpath d='M41 33l3 3 6-7' stroke='%231f4e78' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="主导航">
+        <div class="brand">
+          <div class="brand-mark">PM</div>
+          <div>
+            <h1>项目助理系统</h1>
+            <p>进度 · 风险 · 沟通 · 训练</p>
+          </div>
+        </div>
+        <nav class="nav-list">
+          <button class="nav-item active" data-view="dashboard">工作台</button>
+          <button class="nav-item" data-view="projects">项目进度</button>
+          <button class="nav-item" data-view="risks">风险问题</button>
+          <button class="nav-item" data-view="comms">海外沟通</button>
+          <button class="nav-item" data-view="partners">资源库</button>
+          <button class="nav-item" data-view="training">技能训练</button>
+        </nav>
+        <div class="side-note">
+          <strong>每日原则</strong>
+          <span>事实、影响、下一步、负责人、截止日期。</span>
+        </div>
+      </aside>
+
+      <main class="main">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">研发项目助理</p>
+            <h2 id="viewTitle">工作台</h2>
+          </div>
+          <div class="actions">
+            <button class="ghost-btn" id="exportBtn">导出数据</button>
+            <label class="import-btn">
+              导入数据
+              <input id="importFile" type="file" accept="application/json" />
+            </label>
+            <button class="primary-btn" id="resetBtn">恢复示例</button>
+          </div>
+        </header>
+
+        <section class="view active" id="dashboard">
+          <div class="metrics-grid">
+            <article class="metric">
+              <span>进行中项目</span>
+              <strong id="metricActive">0</strong>
+              <small>需要日常跟进</small>
+            </article>
+            <article class="metric danger">
+              <span>延期/阻塞</span>
+              <strong id="metricDelayed">0</strong>
+              <small>当天同步项目经理</small>
+            </article>
+            <article class="metric warning">
+              <span>未关闭高风险</span>
+              <strong id="metricHighRisks">0</strong>
+              <small>写清影响和支持</small>
+            </article>
+            <article class="metric">
+              <span>海外待回复</span>
+              <strong id="metricWaiting">0</strong>
+              <small>可用英文模板催办</small>
+            </article>
+          </div>
+
+          <div class="dashboard-grid">
+            <section class="panel">
+              <div class="panel-head">
+                <h3>今日优先事项</h3>
+                <button class="text-btn" data-view-jump="projects">去处理</button>
+              </div>
+              <div id="priorityList" class="stack-list"></div>
+            </section>
+            <section class="panel">
+              <div class="panel-head">
+                <h3>周报一键素材</h3>
+                <button class="text-btn" id="copyWeeklyBtn">复制</button>
+              </div>
+              <textarea id="weeklySummary" class="summary-box" readonly></textarea>
+            </section>
+          </div>
+        </section>
+
+        <section class="view" id="projects">
+          <div class="section-toolbar">
+            <div>
+              <h3>项目进度台账</h3>
+              <p>先管节点，再管异常。不要只写“跟进中”，要写下一步。</p>
+            </div>
+            <button class="primary-btn" data-open-form="project">新增项目</button>
+          </div>
+          <div class="filters">
+            <input id="projectSearch" type="search" placeholder="搜索项目、负责人、下一步" />
+            <select id="projectStatusFilter">
+              <option value="">全部状态</option>
+              <option>未开始</option>
+              <option>进行中</option>
+              <option>延期</option>
+              <option>阻塞</option>
+              <option>已完成</option>
+            </select>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>项目</th>
+                  <th>阶段</th>
+                  <th>负责人</th>
+                  <th>计划完成</th>
+                  <th>状态</th>
+                  <th>进度</th>
+                  <th>下一步</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody id="projectRows"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="view" id="risks">
+          <div class="section-toolbar">
+            <div>
+              <h3>风险问题台账</h3>
+              <p>风险不是抱怨，是提前说明影响并推动决策。</p>
+            </div>
+            <button class="primary-btn" data-open-form="risk">新增风险</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>关联项目</th>
+                  <th>类型</th>
+                  <th>等级</th>
+                  <th>问题描述</th>
+                  <th>解决动作</th>
+                  <th>截止日期</th>
+                  <th>状态</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody id="riskRows"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="view" id="comms">
+          <div class="section-toolbar">
+            <div>
+              <h3>海外沟通记录</h3>
+              <p>每次沟通都落到结论、待办、owner 和 deadline。</p>
+            </div>
+            <button class="primary-btn" data-open-form="comm">新增沟通</button>
+          </div>
+          <div class="split-grid">
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>对象</th>
+                    <th>渠道</th>
+                    <th>主题</th>
+                    <th>待办</th>
+                    <th>截止日期</th>
+                    <th>状态</th>
+                    <th>操作</th>
+                  </tr>
+                </thead>
+                <tbody id="commRows"></tbody>
+              </table>
+            </div>
+            <aside class="template-panel">
+              <h3>英文跟进模板</h3>
+              <label>场景</label>
+              <select id="mailScenario">
+                <option value="status">催进度</option>
+                <option value="risk">同步风险</option>
+                <option value="meeting">会议纪要确认</option>
+                <option value="data">索要资料</option>
+              </select>
+              <textarea id="mailTemplate"></textarea>
+              <button class="ghost-btn" id="copyMailBtn">复制邮件</button>
+            </aside>
+          </div>
+        </section>
+
+        <section class="view" id="partners">
+          <div class="section-toolbar">
+            <div>
+              <h3>合作商与代理资源库</h3>
+              <p>记录来源和匹配业务，避免“搜过但找不到”。</p>
+            </div>
+            <button class="primary-btn" data-open-form="partner">新增资源</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>地区</th>
+                  <th>公司/渠道</th>
+                  <th>类型</th>
+                  <th>匹配业务</th>
+                  <th>评级</th>
+                  <th>状态</th>
+                  <th>下一步</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody id="partnerRows"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="view" id="training">
+          <div class="section-toolbar">
+            <div>
+              <h3>岗位技能训练</h3>
+              <p>按顺序练，不用急着全会。先做到能交付，再追求熟练。</p>
+            </div>
+          </div>
+          <div class="training-grid" id="trainingGrid"></div>
+        </section>
+      </main>
+    </div>
+
+    <dialog id="recordDialog">
+      <form method="dialog" class="record-form">
+        <div class="dialog-head">
+          <h3 id="dialogTitle">新增记录</h3>
+          <button class="icon-btn" value="cancel" aria-label="关闭">×</button>
+        </div>
+        <div id="formFields" class="form-grid"></div>
+        <menu>
+          <button class="ghost-btn" value="cancel">取消</button>
+          <button class="primary-btn" id="saveRecordBtn" value="default">保存</button>
+        </menu>
+      </form>
+    </dialog>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="app.js"></script>
+  </body>
+</html>
